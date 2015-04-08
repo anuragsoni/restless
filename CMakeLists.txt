@@ -6,10 +6,10 @@ project(${PROJECT_NAME_STR} CXX)
 
 find_package(CURL REQUIRED)
 
-# Enable C++14 features on gcc/clang
-#if("${CMAKE_CXX_COMPILER_ID}" MATCHES "(GNU|Clang)")
-set(CMAKE_CXX_FLAGS "-std=c++14 -Wall")
-#endif()
+# Enable C++11 features on gcc/clang
+if("${CMAKE_CXX_COMPILER_ID}" MATCHES "(GNU|Clang)")
+set(CMAKE_CXX_FLAGS "-std=c++11 -Wall")
+endif()
 
 # Set source directory
 set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
