@@ -1,5 +1,6 @@
-# Restless
+[![Build Status](https://travis-ci.org/anuragsoni/restless.svg?branch=master)] (https://travis-ci.org/anuragsoni/restless)
 
+# Restless
 **[STILL IN PROGRESS]**
 
 Restless is a simple wrapper around libcurl.
