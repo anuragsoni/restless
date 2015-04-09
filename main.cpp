@@ -8,7 +8,7 @@ int main()
      * A simple get request
      **/
 
-    auto res1 = Http::Handle()
+    auto res1 = Http()
                 .get("http://httpbin.org/get")
                 .exec();
 
@@ -20,7 +20,7 @@ int main()
 
     std::map<std::string, std::string> custom_headers;
     custom_headers["Hello"] = "This is a header";
-    auto res2 = Http::Handle()
+    auto res2 = Http()
                 .get("http://httpbin.org/get", "password-for-basic-auth")
                 .header(custom_headers)
                 .exec();

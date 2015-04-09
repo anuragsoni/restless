@@ -69,7 +69,7 @@ private:
 
 public:
     Handle() {}
-
+    ~Handle() { custom_headers.clear(); }
     Handle &get(const std::string iUri, const std::string password = "");
 
     Handle &header(std::map<std::string, std::string> iHeaders);
