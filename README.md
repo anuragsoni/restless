@@ -1,5 +1,7 @@
 # Restless
 
+**[STILL IN PROGRESS]**
+
 Restless is a simple wrapper around libcurl.
 This will help to make simple HTTP calls in your C++
 code.
@@ -51,7 +53,7 @@ std::cout << res2.body << '\n';
 
 ## Prerequisites
 * libcurl
-* A C++ compiler
+* A compiler with C++11 support
 * cmake
 
 ### External libraries

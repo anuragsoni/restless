@@ -5,6 +5,7 @@ compiler:
   - clang
 
 before_install:
+  - sudo apt-get install -qq libcurl4-openssl-dev
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt-get update -qq
   - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.9; fi
