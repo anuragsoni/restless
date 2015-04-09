@@ -72,9 +72,9 @@ Handle::response Handle::execGet(const std::string &iUrl)
         curl_easy_setopt(curl, CURLOPT_URL, iUrl.c_str());
         // Write callback function
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+        struct curl_slist *chunk = nullptr;
         if(!custom_headers.empty())
         {
-            struct curl_slist *chunk = nullptr;
             for(auto x:custom_headers)
             {
                 std::string temp_header = x.first + ": " + x.second;
@@ -98,6 +98,8 @@ Handle::response Handle::execGet(const std::string &iUrl)
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
         res.code = static_cast<int>(http_code);
         curl_easy_cleanup(curl);
+         /* free the custom headers */
+        curl_slist_free_all(chunk);
         curl_global_cleanup();
     }
     return res;

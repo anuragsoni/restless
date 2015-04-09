@@ -40,6 +40,7 @@ private:
         int code;
         std::string body;
         std::map<std::string, std::string> headers;
+        ~response() { }
     };
 
     response execGet(const std::string &iUri);
