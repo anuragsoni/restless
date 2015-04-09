@@ -1,7 +1,7 @@
 #include <iostream>
 #include <restless.hpp>
 using Http = asoni::Handle;
-int main(void)
+int main()
 {
 
     /*
@@ -19,7 +19,7 @@ int main(void)
      **/
 
     std::map<std::string, std::string> custom_headers;
-    custom_headers["Accept"] = "This is a header";
+    custom_headers["Hello"] = "This is a header";
     auto res2 = Http::Handle()
                 .get("http://httpbin.org/get", "password-for-basic-auth")
                 .header(custom_headers)
