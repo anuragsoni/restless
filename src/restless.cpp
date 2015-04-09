@@ -13,10 +13,25 @@ const std::string Handle::user_agent
 {
     AGENT_NAME
 };
-Handle &Handle::get(const std::string iUri = "")
+
+// Set custom headers
+Handle &Handle::header(std::map<std::string, std::string> iHeaders)
+{
+    if(!iHeaders.empty())
+    {
+        this->custom_headers = iHeaders;
+    }
+    return *this;
+}
+
+Handle &Handle::get(const std::string iUri, const std::string password)
 {
     this->URI = iUri;
-    this->method = GET;
+    this->method = Request_Type::GET;
+    if(!password.empty())
+    {
+        this->basic_auth_pass = password;
+    }
     return *this;
 }
 
@@ -26,9 +41,12 @@ Handle::response Handle::exec()
 
     switch (method)
     {
-    case GET:
+    case Request_Type::GET:
         result = execGet(URI);
         break;
+    default:
+        result.code = -1;
+        result.body = "Invalid HTTP Method called";
     }
     return result;
 }
@@ -41,12 +59,29 @@ Handle::response Handle::execGet(const std::string &iUrl)
     curl = curl_easy_init();
     if (curl)
     {
+        // Check if basic auth password provided
+        if(!basic_auth_pass.empty())
+        {
+            curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+            curl_easy_setopt(curl, CURLOPT_USERPWD, basic_auth_pass.c_str());
+        }
+
         // User agent
         curl_easy_setopt(curl, CURLOPT_USERAGENT, Handle::user_agent.c_str());
         // Requested URL
         curl_easy_setopt(curl, CURLOPT_URL, iUrl.c_str());
         // Write callback function
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+        if(!custom_headers.empty())
+        {
+            struct curl_slist *chunk = nullptr;
+            for(auto x:custom_headers)
+            {
+                std::string temp_header = x.first + ": " + x.second;
+                chunk = curl_slist_append(chunk, temp_header.c_str());
+            }
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+        }
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &res);
         // Header callback function
         curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);

@@ -18,13 +18,21 @@ namespace asoni
 {
 class Handle
 {
+private:
     // Request Types
-    enum Request_Type {GET, PUT, POST, DELETE};
+    enum class Request_Type {GET, PUT, POST, DELETE};
 
     Request_Type method;
 
     // Request URI
     std::string URI;
+
+    //Password for Basic Auth
+    std::string basic_auth_pass;
+
+
+    // Custom headers
+    std::map<std::string, std::string> custom_headers;
 
     // Http response
     struct response
@@ -58,11 +66,14 @@ class Handle
      */
     static size_t header_callback(void *ptr, size_t size, size_t nmemb, Handle::response *res);
 
+
 public:
     Handle() {}
-    Handle &get(const std::string iUri);
+
+    Handle &get(const std::string iUri, const std::string password = "");
+
+    Handle &header(std::map<std::string, std::string> iHeaders);
 
     response exec();
-
 };
 } // Namespace asoni ends
