@@ -55,7 +55,6 @@ std::cout << res2.body << '\n';
 * cmake
 
 ### External libraries
-* [nlohmann's json library](https://github.com/nlohmann/json)
 * [philsquared's catch unit testing](https://github.com/philsquared/Catch)
 
 ### Steps to build
