@@ -52,7 +52,7 @@ std::cout << res2.body << '\n';
 ## Prerequisites
 * libcurl
 * A compiler with C++11 support
-* cmake
+* cmake (At least version 2.8.11)
 
 ### External libraries
 * [philsquared's catch unit testing](https://github.com/philsquared/Catch)
