@@ -46,6 +46,14 @@ auto res2 = Http().get("http://httpbin.org/get", "password-for-basic-auth")
 
 std::cout << res2.body << '\n';
 
+/*
+ * A post request with basic auth
+ **/
+auto post1 = Http().post("http://httpbin.org/post", "super-secret-password")
+                    .content("text/plain", "Hello world")
+                    .exec();
+    std::cout << post1.body << '\n';
+
 ```
 
 

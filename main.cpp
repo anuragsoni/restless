@@ -22,4 +22,9 @@ int main()
                 .exec();
 
     std::cout << res2.body << '\n';
+
+    auto post1 = Http().post("http://httpbin.org/post", "super-secret-password")
+                    .content("text/plain", "Hello world")
+                    .exec();
+    std::cout << post1.body << '\n';
 }
