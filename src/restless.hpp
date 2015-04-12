@@ -7,12 +7,9 @@
 #include <curl/curl.h>
 #include <string>
 #include <iostream>
-#include "json.hpp"
 #include <map>
 #include "helpers.hpp"
 #define AGENT_NAME "restless/0.1"
-
-using json = nlohmann::json;
 
 namespace asoni
 {
