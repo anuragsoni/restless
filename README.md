@@ -54,10 +54,14 @@ std::cout << res2.body << '\n';
 * A compiler with C++11 support
 * cmake (At least version 2.8.11)
 
-### External libraries
+**Note:**A vagrant file has been provided that will provision a Ubuntu14.04
+box with all the pre-requisites. Just ```vagrant up``` then ```vagrant ssh```.
+You will find the code in /vagrant directory inside the vagrant box.
+
+## External libraries
 * [philsquared's catch unit testing](https://github.com/philsquared/Catch)
 
-### Steps to build
+## Steps to build
 * cd build
 * cmake ..
 * make
