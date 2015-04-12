@@ -1,11 +1,9 @@
 [![Build Status](https://travis-ci.org/anuragsoni/restless.svg?branch=master)] (https://travis-ci.org/anuragsoni/restless)
 
 # Restless
-**[STILL IN PROGRESS]**
-
-Restless is a simple wrapper around libcurl.
-This will help to make simple HTTP calls in your C++
-code.
+Restless is a simple REST client for C++.
+it is a wrapper for libcurl for making
+readable HTTP requests.
 
 
 ## Integration
@@ -34,8 +32,6 @@ using Http = asoni::Handle;
 auto res1 = Http().get("http://httpbin.org/get")
             .exec();
 
-std::cout << res1.body << "\n";
-
 /*
  * A get request with basic auth and a custom header
  **/
@@ -44,15 +40,28 @@ auto res2 = Http().get("http://httpbin.org/get", "password-for-basic-auth")
             .header({{"Hello", "This is a header"}, {"Second","Another header"}})
             .exec();
 
-std::cout << res2.body << '\n';
-
 /*
  * A post request with basic auth
  **/
 auto post1 = Http().post("http://httpbin.org/post", "super-secret-password")
                     .content("text/plain", "Hello world")
                     .exec();
-std::cout << post1.body << '\n';
+
+/*
+ * A simple put request
+ **/
+
+auto put1 = Http().put("http://httpbin.org/put")
+            .content("text/plain", "Hello world")
+            .exec();
+
+/*
+ * A simple delete request
+ **/
+
+auto del = Http().del("http://httpbin.org/delete")
+           .exec();
+
 
 ```
 
