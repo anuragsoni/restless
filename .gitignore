@@ -26,3 +26,13 @@
 *.exe
 *.out
 *.app
+
+# Vagrant
+.vagrant/
+.cache/
+.oh-my-zsh/
+.zcompdump
+.zcompdump-jarvis-5.0.2
+.zsh_history
+.zshrc
+.zsh-update
