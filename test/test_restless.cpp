@@ -13,6 +13,15 @@ TEST_CASE( "Simple Get Request", "[get]" ) {
     REQUIRE(result.body == actual);
 }
 
+TEST_CASE( "Simple Get Request: HTTPS", "[get]" ) {
+    auto result = asoni::Handle()
+                  .get("https://httpbin.org/robots.txt")
+                  .exec();
+    REQUIRE(result.code == 200);
+    std::string actual = "User-agent: *\nDisallow: /deny\n";
+    REQUIRE(result.body == actual);
+}
+
 TEST_CASE( "Get Request with basic auth and headers", "[get]" ) {
     auto result = asoni::Handle()
                   .get("http://httpbin.org/get", "password")
@@ -46,6 +55,17 @@ TEST_CASE( "Simple Post Request", "[post]" ) {
     std::string post_content = "Hello world";
     auto result = asoni::Handle()
                   .post("http://httpbin.org/post")
+                  .content("text/plain", post_content)
+                  .exec();
+    auto response = json::parse(result.body);
+    REQUIRE(result.code == 200);
+    REQUIRE(response["data"] == post_content);
+}
+
+TEST_CASE( "Simple Post Request : HTTPS", "[post]" ) {
+    std::string post_content = "Hello world";
+    auto result = asoni::Handle()
+                  .post("https://httpbin.org/post")
                   .content("text/plain", post_content)
                   .exec();
     auto response = json::parse(result.body);
