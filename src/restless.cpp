@@ -5,7 +5,7 @@
  */
 
 #include "restless.hpp"
-
+#include <cstring>
 namespace asoni
 {
 // set the user agent
@@ -46,6 +46,28 @@ Handle &Handle::post(const std::string iUri, const std::string password)
     return *this;
 }
 
+Handle &Handle::put(const std::string iUri, const std::string password)
+{
+    this->URI = iUri;
+    this->method = Request_Type::PUT;
+    if (!password.empty())
+    {
+        this->basic_auth_pass = password;
+    }
+    return *this;
+}
+
+Handle &Handle::del(const std::string iUri, const std::string password)
+{
+    this->URI = iUri;
+    this->method = Request_Type::DELETE;
+    if (!password.empty())
+    {
+        this->basic_auth_pass = password;
+    }
+    return *this;
+}
+
 Handle &Handle::content(const std::string content_type, const std::string content_data)
 {
     this->post_content = content_data;
@@ -64,6 +86,12 @@ Handle::response Handle::exec()
         break;
     case Request_Type::POST:
         result = execPost();
+        break;
+    case Request_Type::PUT:
+        result = execPut();
+        break;
+    case Request_Type::DELETE:
+        result = execDel();
         break;
     default:
         result.code = -1;
@@ -207,6 +235,150 @@ Handle::response Handle::execPost()
     return res;
 }
 
+Handle::response Handle::execPut()
+{
+    CURL *curl{nullptr};
+    CURLcode req = CURLE_OK;
+    response res;
+    upload_object up_obj;
+    if (!post_content.empty())
+    {
+        up_obj.data = post_content.c_str();
+        up_obj.length = post_content.size();
+    } else {
+        res.code = -1;
+        res.body = "Empty put content not allowed. Did you meant to use GET?";
+        return res;
+    }
+
+
+    curl = curl_easy_init();
+    if (curl)
+    {
+        // Check if basic auth password provided
+        if (!basic_auth_pass.empty())
+        {
+            curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+            curl_easy_setopt(curl, CURLOPT_USERPWD, basic_auth_pass.c_str());
+        }
+        // User agent
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, Handle::user_agent.c_str());
+        // Requested URL
+        curl_easy_setopt(curl, CURLOPT_URL, URI.c_str());
+
+        curl_easy_setopt(curl, CURLOPT_PUT, 1L);
+        curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+
+        // set read callback function
+        curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+        // set data object to pass to callback function
+        curl_easy_setopt(curl, CURLOPT_READDATA, &up_obj);
+        // Write callback function
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &res);
+
+        // Header callback function
+        curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+        curl_easy_setopt(curl, CURLOPT_HEADERDATA, &res);
+        // set data size
+        curl_easy_setopt(curl, CURLOPT_INFILESIZE,
+                         static_cast<long>(up_obj.length));
+        struct curl_slist *chunk = nullptr;
+        if (!post_content_type.empty())
+        {
+            std::string content_type = "Content-Type: " + post_content_type;
+            chunk = curl_slist_append(chunk, content_type.c_str());
+        } else {
+            res.body = "Content-type needs to be provided.";
+            res.code = -1;
+            return res;
+        }
+        if (!custom_headers.empty())
+        {
+            for (auto x : custom_headers)
+            {
+                std::string temp_header = x.first + ": " + x.second;
+                chunk = curl_slist_append(chunk, temp_header.c_str());
+            }
+        }
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+
+        // Perform curl request
+        req = curl_easy_perform(curl);
+        if (req != CURLE_OK)
+        {
+            res.body = "Put request failed.";
+            res.code = -1;
+            return res;
+        }
+        long http_code {0};
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+        res.code = static_cast<int>(http_code);
+        curl_easy_cleanup(curl);
+        /* free the custom headers */
+        curl_slist_free_all(chunk);
+        curl_global_cleanup();
+    }
+    return res;
+}
+
+Handle::response Handle::execDel()
+{
+    CURL *curl{nullptr};
+    CURLcode req = CURLE_OK;
+    response res;
+    curl = curl_easy_init();
+    if (curl)
+    {
+        // Check if basic auth password provided
+        if (!basic_auth_pass.empty())
+        {
+            curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+            curl_easy_setopt(curl, CURLOPT_USERPWD, basic_auth_pass.c_str());
+        }
+
+        // User agent
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, Handle::user_agent.c_str());
+        // Requested URL
+        curl_easy_setopt(curl, CURLOPT_URL, URI.c_str());
+        // We want the DELETE method
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+        // Write callback function
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &res);
+        struct curl_slist *chunk = nullptr;
+        if (!custom_headers.empty())
+        {
+            for (auto x : custom_headers)
+            {
+                std::string temp_header = x.first + ": " + x.second;
+                chunk = curl_slist_append(chunk, temp_header.c_str());
+            }
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+        }
+
+        // Header callback function
+        curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+        curl_easy_setopt(curl, CURLOPT_HEADERDATA, &res);
+        // Perform curl request
+        req = curl_easy_perform(curl);
+        if (req != CURLE_OK)
+        {
+            res.body = "Delete request failed.";
+            res.code = -1;
+            return res;
+        }
+        long http_code {0};
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+        res.code = static_cast<int>(http_code);
+        curl_easy_cleanup(curl);
+        /* free the custom headers */
+        curl_slist_free_all(chunk);
+        curl_global_cleanup();
+    }
+    return res;
+}
+
 /*
  * Function - write callback for libcurl
  * @param data
@@ -251,6 +423,20 @@ size_t Handle::header_callback(void *data, size_t size, size_t nmemb, Handle::re
         res->headers[header_key] = header_value;
     }
     return (size * nmemb);
+}
+
+size_t Handle::read_callback(void* data, size_t size, size_t nmemb, Handle::upload_object *up_obj)
+{
+    // set size
+    size_t curl_size = size * nmemb;
+    size_t copy_size = (up_obj->length < curl_size) ? up_obj->length : curl_size;
+    // copy data to buffer
+    memcpy(data, up_obj->data, copy_size);
+    // decrement length and increment data pointer
+    up_obj->length -= copy_size;
+    up_obj->data += copy_size;
+    // return copied size
+    return copy_size;
 }
 
 } // namespace asoni ends here

@@ -45,9 +45,20 @@ private:
         ~response() { }
     };
 
+    // struct for uploading data
+    struct upload_object
+    {
+        const char* data;
+        size_t length;
+    };
+
     response execGet();
 
     response execPost();
+
+    response execPut();
+
+    response execDel();
 
     /*
      * HTTP user-agent header
@@ -61,7 +72,7 @@ private:
     * delivered data, and the size of that data is size multiplied
     * with nmemb.
     */
-    static size_t write_callback(void *ptr, size_t size, size_t nmemb, Handle::response *res);
+    static size_t write_callback(void *data, size_t size, size_t nmemb, Handle::response *res);
 
     /*
      * Callback that receives the header data. [CURLOPT_HEADERFUNCTION]
@@ -69,8 +80,9 @@ private:
      * header data. The header callback will be called once for each
      * header
      */
-    static size_t header_callback(void *ptr, size_t size, size_t nmemb, Handle::response *res);
+    static size_t header_callback(void *data, size_t size, size_t nmemb, Handle::response *res);
 
+    static size_t read_callback(void *data, size_t size, size_t nmemb, Handle::upload_object *up_obj);
 
 public:
     Handle() {}
@@ -78,6 +90,10 @@ public:
     Handle &get(const std::string iUri, const std::string password = "");
 
     Handle &post(const std::string iUri, const std::string password = "");
+
+    Handle &put(const std::string iUrl, const std::string password = "");
+
+    Handle &del(const std::string iUrl, const std::string password = "");
 
     Handle &header(std::map<std::string, std::string> iHeaders);
 
