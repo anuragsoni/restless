@@ -27,6 +27,11 @@ private:
     //Password for Basic Auth
     std::string basic_auth_pass;
 
+    // Post content type
+    std::string post_content_type;
+
+    // Post content
+    std::string post_content;
 
     // Custom headers
     std::map<std::string, std::string> custom_headers;
@@ -40,7 +45,9 @@ private:
         ~response() { }
     };
 
-    response execGet(const std::string &iUri);
+    response execGet();
+
+    response execPost();
 
     /*
      * HTTP user-agent header
@@ -70,7 +77,11 @@ public:
     ~Handle() { custom_headers.clear(); }
     Handle &get(const std::string iUri, const std::string password = "");
 
+    Handle &post(const std::string iUri, const std::string password = "");
+
     Handle &header(std::map<std::string, std::string> iHeaders);
+
+    Handle &content(const std::string content_type, const std::string content_data);
 
     response exec();
 };
