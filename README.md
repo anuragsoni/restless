@@ -1,9 +1,7 @@
 [![Build Status](https://travis-ci.org/anuragsoni/restless.svg?branch=master)] (https://travis-ci.org/anuragsoni/restless)
 
 # Restless
-Restless is a simple REST client for C++.
-it is a wrapper for libcurl for making
-readable HTTP requests.
+Restless is a simple REST client for C++, powered by curl.
 
 
 ## Integration
