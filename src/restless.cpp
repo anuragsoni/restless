@@ -60,7 +60,7 @@ Handle &Handle::put(const std::string iUri, const std::string password)
 Handle &Handle::del(const std::string iUri, const std::string password)
 {
     this->URI = iUri;
-    this->method = Request_Type::DELETE;
+    this->method = Request_Type::DEL;
     if (!password.empty())
     {
         this->basic_auth_pass = password;
@@ -79,166 +79,145 @@ Handle::response Handle::exec()
 {
     response result;
 
-    switch (method)
+    if (curl)
     {
-    case Request_Type::GET:
-        result = execGet();
-        break;
-    case Request_Type::POST:
-        result = execPost();
-        break;
-    case Request_Type::PUT:
-        result = execPut();
-        break;
-    case Request_Type::DELETE:
-        result = execDel();
-        break;
-    default:
+        // Check if basic auth password provided
+        if (!basic_auth_pass.empty())
+        {
+            curl_easy_setopt(curl.get(), CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+            curl_easy_setopt(curl.get(), CURLOPT_USERPWD, basic_auth_pass.c_str());
+        }
+
+        // User agent
+        curl_easy_setopt(curl.get(), CURLOPT_USERAGENT, Handle::user_agent.c_str());
+        // Requested URL
+        curl_easy_setopt(curl.get(), CURLOPT_URL, URI.c_str());
+        switch (method)
+        {
+        case Request_Type::GET:
+            result = execGet();
+            break;
+        case Request_Type::POST:
+            result = execPost();
+            break;
+        case Request_Type::PUT:
+            result = execPut();
+            break;
+        case Request_Type::DEL:
+            result = execDel();
+            break;
+        default:
+            result.code = -1;
+            result.body = "Invalid HTTP Method called";
+        }
+    } else {
+        result.body = "Failed to initialize curl";
         result.code = -1;
-        result.body = "Invalid HTTP Method called";
     }
+
     return result;
 }
 
 Handle::response Handle::execGet()
 {
-    CURL *curl{nullptr};
-    CURLcode req = CURLE_OK;
     response res;
-    curl = curl_easy_init();
-    if (curl)
+    // Write callback function
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &res);
+    struct curl_slist *chunk = nullptr;
+    if (!custom_headers.empty())
     {
-        // Check if basic auth password provided
-        if (!basic_auth_pass.empty())
+        for (auto x : custom_headers)
         {
-            curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-            curl_easy_setopt(curl, CURLOPT_USERPWD, basic_auth_pass.c_str());
+            std::string temp_header = x.first + ": " + x.second;
+            chunk = curl_slist_append(chunk, temp_header.c_str());
         }
-
-        // User agent
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, Handle::user_agent.c_str());
-        // Requested URL
-        curl_easy_setopt(curl, CURLOPT_URL, URI.c_str());
-        // Write callback function
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &res);
-        struct curl_slist *chunk = nullptr;
-        if (!custom_headers.empty())
-        {
-            for (auto x : custom_headers)
-            {
-                std::string temp_header = x.first + ": " + x.second;
-                chunk = curl_slist_append(chunk, temp_header.c_str());
-            }
-            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
-        }
-
-        // Header callback function
-        curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
-        curl_easy_setopt(curl, CURLOPT_HEADERDATA, &res);
-        // Perform curl request
-        req = curl_easy_perform(curl);
-        if (req != CURLE_OK)
-        {
-            res.body = "Failed to fetch response.";
-            res.code = -1;
-            return res;
-        }
-        long http_code {0};
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-        res.code = static_cast<int>(http_code);
-        curl_easy_cleanup(curl);
-        /* free the custom headers */
-        curl_slist_free_all(chunk);
-        curl_global_cleanup();
+        curl_easy_setopt(curl.get(), CURLOPT_HTTPHEADER, chunk);
     }
+
+    // Header callback function
+    curl_easy_setopt(curl.get(), CURLOPT_HEADERFUNCTION, header_callback);
+    curl_easy_setopt(curl.get(), CURLOPT_HEADERDATA, &res);
+    // Perform curl request
+    const auto req = curl_easy_perform(curl.get());
+    if (req != CURLE_OK)
+    {
+        res.body = "Failed to fetch response.";
+        res.code = -1;
+        return res;
+    }
+    long http_code {0};
+    curl_easy_getinfo(curl.get(), CURLINFO_RESPONSE_CODE, &http_code);
+    res.code = static_cast<int>(http_code);
+    /* free the custom headers */
+    curl_slist_free_all(chunk);
     return res;
 }
 
 Handle::response Handle::execPost()
 {
-    CURL *curl{nullptr};
-    CURLcode req = CURLE_OK;
     response res;
-    curl = curl_easy_init();
-    if (curl)
+
+    // 1L tells libcurl to do a regular HTTP post.
+    // This will also make the library use a
+    // "Content-Type: application/x-www-form-urlencoded" header.
+    curl_easy_setopt(curl.get(), CURLOPT_POST, 1L);
+    // Set post fields and post field size
+    if (!post_content.empty())
     {
-        // Check if basic auth password provided
-        if (!basic_auth_pass.empty())
-        {
-            curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-            curl_easy_setopt(curl, CURLOPT_USERPWD, basic_auth_pass.c_str());
-        }
-        // User agent
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, Handle::user_agent.c_str());
-        // Requested URL
-        curl_easy_setopt(curl, CURLOPT_URL, URI.c_str());
-
-        // 1L tells libcurl to do a regular HTTP post.
-        // This will also make the library use a
-        // "Content-Type: application/x-www-form-urlencoded" header.
-        curl_easy_setopt(curl, CURLOPT_POST, 1L);
-        // Set post fields and post field size
-        if (!post_content.empty())
-        {
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_content.c_str());
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, post_content.size());
-        } else {
-            res.body = "Empty post content not allowed. Did you meant to use GET?";
-            res.code = -1;
-            return res;
-        }
-        // Write callback function
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &res);
-
-        // Header callback function
-        curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
-        curl_easy_setopt(curl, CURLOPT_HEADERDATA, &res);
-
-        struct curl_slist *chunk = nullptr;
-        if (!post_content_type.empty())
-        {
-            std::string content_type = "Content-Type: " + post_content_type;
-            chunk = curl_slist_append(chunk, content_type.c_str());
-        } else {
-            res.body = "Content-type needs to be provided.";
-            res.code = -1;
-            return res;
-        }
-        if (!custom_headers.empty())
-        {
-            for (auto x : custom_headers)
-            {
-                std::string temp_header = x.first + ": " + x.second;
-                chunk = curl_slist_append(chunk, temp_header.c_str());
-            }
-        }
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
-
-        // Perform curl request
-        req = curl_easy_perform(curl);
-        if (req != CURLE_OK)
-        {
-            res.body = "Failed to post content.";
-            res.code = -1;
-            return res;
-        }
-        long http_code {0};
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-        res.code = static_cast<int>(http_code);
-        curl_easy_cleanup(curl);
-        /* free the custom headers */
-        curl_slist_free_all(chunk);
-        curl_global_cleanup();
+        curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDS, post_content.c_str());
+        curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDSIZE, post_content.size());
+    } else {
+        res.body = "Empty post content not allowed. Did you meant to use GET?";
+        res.code = -1;
+        return res;
     }
+    // Write callback function
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &res);
+
+    // Header callback function
+    curl_easy_setopt(curl.get(), CURLOPT_HEADERFUNCTION, header_callback);
+    curl_easy_setopt(curl.get(), CURLOPT_HEADERDATA, &res);
+
+    struct curl_slist *chunk = nullptr;
+    if (!post_content_type.empty())
+    {
+        std::string content_type = "Content-Type: " + post_content_type;
+        chunk = curl_slist_append(chunk, content_type.c_str());
+    } else {
+        res.body = "Content-type needs to be provided.";
+        res.code = -1;
+        return res;
+    }
+    if (!custom_headers.empty())
+    {
+        for (auto x : custom_headers)
+        {
+            std::string temp_header = x.first + ": " + x.second;
+            chunk = curl_slist_append(chunk, temp_header.c_str());
+        }
+    }
+    curl_easy_setopt(curl.get(), CURLOPT_HTTPHEADER, chunk);
+
+    // Perform curl request
+    const auto req = curl_easy_perform(curl.get());
+    if (req != CURLE_OK)
+    {
+        res.body = "Failed to post content.";
+        res.code = -1;
+        return res;
+    }
+    long http_code {0};
+    curl_easy_getinfo(curl.get(), CURLINFO_RESPONSE_CODE, &http_code);
+    res.code = static_cast<int>(http_code);
+    /* free the custom headers */
+    curl_slist_free_all(chunk);
     return res;
 }
 
 Handle::response Handle::execPut()
 {
-    CURL *curl{nullptr};
-    CURLcode req = CURLE_OK;
     response res;
     upload_object up_obj;
     if (!post_content.empty())
@@ -251,131 +230,95 @@ Handle::response Handle::execPut()
         return res;
     }
 
+    curl_easy_setopt(curl.get(), CURLOPT_PUT, 1L);
+    curl_easy_setopt(curl.get(), CURLOPT_UPLOAD, 1L);
 
-    curl = curl_easy_init();
-    if (curl)
+    // set read callback function
+    curl_easy_setopt(curl.get(), CURLOPT_READFUNCTION, read_callback);
+    // set data object to pass to callback function
+    curl_easy_setopt(curl.get(), CURLOPT_READDATA, &up_obj);
+    // Write callback function
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &res);
+
+    // Header callback function
+    curl_easy_setopt(curl.get(), CURLOPT_HEADERFUNCTION, header_callback);
+    curl_easy_setopt(curl.get(), CURLOPT_HEADERDATA, &res);
+    // set data size
+    curl_easy_setopt(curl.get(), CURLOPT_INFILESIZE,
+                     static_cast<long>(up_obj.length));
+    struct curl_slist *chunk = nullptr;
+    if (!post_content_type.empty())
     {
-        // Check if basic auth password provided
-        if (!basic_auth_pass.empty())
-        {
-            curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-            curl_easy_setopt(curl, CURLOPT_USERPWD, basic_auth_pass.c_str());
-        }
-        // User agent
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, Handle::user_agent.c_str());
-        // Requested URL
-        curl_easy_setopt(curl, CURLOPT_URL, URI.c_str());
-
-        curl_easy_setopt(curl, CURLOPT_PUT, 1L);
-        curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-
-        // set read callback function
-        curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
-        // set data object to pass to callback function
-        curl_easy_setopt(curl, CURLOPT_READDATA, &up_obj);
-        // Write callback function
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &res);
-
-        // Header callback function
-        curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
-        curl_easy_setopt(curl, CURLOPT_HEADERDATA, &res);
-        // set data size
-        curl_easy_setopt(curl, CURLOPT_INFILESIZE,
-                         static_cast<long>(up_obj.length));
-        struct curl_slist *chunk = nullptr;
-        if (!post_content_type.empty())
-        {
-            std::string content_type = "Content-Type: " + post_content_type;
-            chunk = curl_slist_append(chunk, content_type.c_str());
-        } else {
-            res.body = "Content-type needs to be provided.";
-            res.code = -1;
-            return res;
-        }
-        if (!custom_headers.empty())
-        {
-            for (auto x : custom_headers)
-            {
-                std::string temp_header = x.first + ": " + x.second;
-                chunk = curl_slist_append(chunk, temp_header.c_str());
-            }
-        }
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
-
-        // Perform curl request
-        req = curl_easy_perform(curl);
-        if (req != CURLE_OK)
-        {
-            res.body = "Put request failed.";
-            res.code = -1;
-            return res;
-        }
-        long http_code {0};
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-        res.code = static_cast<int>(http_code);
-        curl_easy_cleanup(curl);
-        /* free the custom headers */
-        curl_slist_free_all(chunk);
-        curl_global_cleanup();
+        std::string content_type = "Content-Type: " + post_content_type;
+        chunk = curl_slist_append(chunk, content_type.c_str());
+    } else {
+        res.body = "Content-type needs to be provided.";
+        res.code = -1;
+        return res;
     }
+    if (!custom_headers.empty())
+    {
+        for (auto x : custom_headers)
+        {
+            std::string temp_header = x.first + ": " + x.second;
+            chunk = curl_slist_append(chunk, temp_header.c_str());
+        }
+    }
+    curl_easy_setopt(curl.get(), CURLOPT_HTTPHEADER, chunk);
+
+    // Perform curl request
+    const auto req = curl_easy_perform(curl.get());
+    if (req != CURLE_OK)
+    {
+        res.body = "Put request failed.";
+        res.code = -1;
+        return res;
+    }
+    long http_code {0};
+    curl_easy_getinfo(curl.get(), CURLINFO_RESPONSE_CODE, &http_code);
+    res.code = static_cast<int>(http_code);
+    /* free the custom headers */
+    curl_slist_free_all(chunk);
     return res;
 }
 
 Handle::response Handle::execDel()
 {
-    CURL *curl{nullptr};
-    CURLcode req = CURLE_OK;
     response res;
-    curl = curl_easy_init();
-    if (curl)
+    // We want the DELETE method
+    curl_easy_setopt(curl.get(), CURLOPT_CUSTOMREQUEST, "DELETE");
+    // Write callback function
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &res);
+    struct curl_slist *chunk = nullptr;
+    if (!custom_headers.empty())
     {
-        // Check if basic auth password provided
-        if (!basic_auth_pass.empty())
+        for (auto x : custom_headers)
         {
-            curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-            curl_easy_setopt(curl, CURLOPT_USERPWD, basic_auth_pass.c_str());
+            std::string temp_header = x.first + ": " + x.second;
+            chunk = curl_slist_append(chunk, temp_header.c_str());
         }
-
-        // User agent
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, Handle::user_agent.c_str());
-        // Requested URL
-        curl_easy_setopt(curl, CURLOPT_URL, URI.c_str());
-        // We want the DELETE method
-        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
-        // Write callback function
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &res);
-        struct curl_slist *chunk = nullptr;
-        if (!custom_headers.empty())
-        {
-            for (auto x : custom_headers)
-            {
-                std::string temp_header = x.first + ": " + x.second;
-                chunk = curl_slist_append(chunk, temp_header.c_str());
-            }
-            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
-        }
-
-        // Header callback function
-        curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
-        curl_easy_setopt(curl, CURLOPT_HEADERDATA, &res);
-        // Perform curl request
-        req = curl_easy_perform(curl);
-        if (req != CURLE_OK)
-        {
-            res.body = "Delete request failed.";
-            res.code = -1;
-            return res;
-        }
-        long http_code {0};
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-        res.code = static_cast<int>(http_code);
-        curl_easy_cleanup(curl);
-        /* free the custom headers */
-        curl_slist_free_all(chunk);
-        curl_global_cleanup();
+        curl_easy_setopt(curl.get(), CURLOPT_HTTPHEADER, chunk);
     }
+
+    // Header callback function
+    curl_easy_setopt(curl.get(), CURLOPT_HEADERFUNCTION, header_callback);
+    curl_easy_setopt(curl.get(), CURLOPT_HEADERDATA, &res);
+    // Perform curl request
+    const auto req = curl_easy_perform(curl.get());
+    if (req != CURLE_OK)
+    {
+        res.body = "Delete request failed.";
+        res.code = -1;
+        return res;
+    }
+    long http_code {0};
+    curl_easy_getinfo(curl.get(), CURLINFO_RESPONSE_CODE, &http_code);
+    res.code = static_cast<int>(http_code);
+    /* free the custom headers */
+    curl_slist_free_all(chunk);
+
     return res;
 }
 

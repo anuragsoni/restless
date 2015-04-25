@@ -8,6 +8,7 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include <memory>
 #include "helpers.hpp"
 
 namespace asoni
@@ -15,8 +16,11 @@ namespace asoni
 class Handle
 {
 private:
+
+    std::unique_ptr<CURL,  void(*)(CURL*)> curl;
+
     // Request Types
-    enum class Request_Type {GET, PUT, POST, DELETE};
+    enum class Request_Type {GET, PUT, POST, DEL};
 
     Request_Type method;
 
@@ -81,11 +85,21 @@ private:
      */
     static size_t header_callback(void *data, size_t size, size_t nmemb, Handle::response *res);
 
+    /*
+    * This function will be called by libcurl as soon as it needs
+    * to read data in order to send it to the peer.
+    */
     static size_t read_callback(void *data, size_t size, size_t nmemb, Handle::upload_object *up_obj);
 
 public:
-    Handle() {}
-    ~Handle() { custom_headers.clear(); }
+
+    Handle() : curl(curl_easy_init(), curl_easy_cleanup) { curl_global_init( CURL_GLOBAL_ALL ); }
+
+    ~Handle()
+    {
+        curl_global_cleanup();
+    }
+
     Handle &get(const std::string iUri, const std::string password = "");
 
     Handle &post(const std::string iUri, const std::string password = "");
