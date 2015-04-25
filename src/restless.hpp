@@ -9,7 +9,6 @@
 #include <iostream>
 #include <map>
 #include "helpers.hpp"
-#define AGENT_NAME "restless/0.1"
 
 namespace asoni
 {
