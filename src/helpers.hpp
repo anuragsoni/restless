@@ -5,25 +5,33 @@
  */
 #pragma once
 #include <algorithm>
-#define AGENT_NAME "restless/0.1"
-namespace asoni
+#define AGENT_NAME "restless/0.2"
+namespace
 {
-// Trim string from beginning
-inline std::string &ltrim(std::string &s)
+// Extensions for std::string to trim whitespace
+inline std::string& ltrim( std::string& str )
 {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
-    return s;
+    if ( !str.size() ) return str;
+    // find the last whitespace chr, then delete from there to end.
+    auto iter = --str.end() ;
+    while ( isspace( *iter ) ) --iter;
+    str.erase( ++iter, str.end() ) ;
+    return str ;
 }
-// Trim string from the end
-inline std::string &rtrim(std::string &s)
+
+inline std::string& rtrim( std::string& str )
 {
-    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
-    return s;
+    if ( !str.size() ) return str;
+    // find first non-whitespace, then delete from begin to there.
+    auto iter = str.begin() ;
+    while ( iter != str.end() && isspace( *iter ) ) ++iter;
+    str.erase( str.begin(), iter ) ;
+    return str ;
 }
-// Trim string from both ends
-inline std::string &trim(std::string &s)
+
+inline std::string& trim( std::string& str )
 {
-    return ltrim(rtrim(s));
+    return rtrim( ltrim( str ) ) ;
 }
 
 }
