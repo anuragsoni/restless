@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Restless by anuragsoni</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Restless</h1>
+      <h2 class="project-tagline">A C++ REST client. Make readable HTTP requests</h2>
+      <a href="https://github.com/anuragsoni/restless" class="btn">View on GitHub</a>
+      <a href="https://github.com/anuragsoni/restless/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/anuragsoni/restless/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <p><a href="https://drone.io/github.com/anuragsoni/restless/latest"><img src="https://drone.io/github.com/anuragsoni/restless/status.png" alt="Build Status"></a></p>
+
+<h1>
+<a id="restless" class="anchor" href="#restless" aria-hidden="true"><span class="octicon octicon-link"></span></a>Restless</h1>
+
+<p>Restless is a simple REST client for C++, powered by curl.</p>
+
+<h2>
+<a id="integration" class="anchor" href="#integration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Integration</h2>
+
+<p>You can use your project's existing build system to compile
+all the files in <code>src</code> directory and link to your project.</p>
+
+<p>To use this all you need to do is add</p>
+
+<div class="highlight highlight-cpp"><pre>#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>restless.hpp<span class="pl-pds">&gt;</span></span>
+
+<span class="pl-c">// for a more readable name</span>
+<span class="pl-k">using</span> Http = asoni::<span class="pl-c1">Handle</span>;</pre></div>
+
+<h2>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h2>
+
+<div class="highlight highlight-cpp"><pre>
+
+<span class="pl-c">/*</span>
+<span class="pl-c"> * A simple get request</span>
+<span class="pl-c"> **/</span>
+
+<span class="pl-k">auto</span> res1 = Http().get(<span class="pl-s"><span class="pl-pds">"</span>http://httpbin.org/get<span class="pl-pds">"</span></span>)
+            .exec();
+
+<span class="pl-c">/*</span>
+<span class="pl-c"> * A get request with basic auth and a custom header</span>
+<span class="pl-c"> **/</span>
+
+<span class="pl-k">auto</span> res2 = Http().get(<span class="pl-s"><span class="pl-pds">"</span>http://httpbin.org/get<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>password-for-basic-auth<span class="pl-pds">"</span></span>)
+            .header({{<span class="pl-s"><span class="pl-pds">"</span>Hello<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>This is a header<span class="pl-pds">"</span></span>}, {<span class="pl-s"><span class="pl-pds">"</span>Second<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>Another header<span class="pl-pds">"</span></span>}})
+            .exec();
+
+<span class="pl-c">/*</span>
+<span class="pl-c"> * A post request with basic auth</span>
+<span class="pl-c"> **/</span>
+<span class="pl-k">auto</span> post1 = Http().post(<span class="pl-s"><span class="pl-pds">"</span>http://httpbin.org/post<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>super-secret-password<span class="pl-pds">"</span></span>)
+                    .content(<span class="pl-s"><span class="pl-pds">"</span>text/plain<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>Hello world<span class="pl-pds">"</span></span>)
+                    .exec();
+
+<span class="pl-c">/*</span>
+<span class="pl-c"> * A simple put request</span>
+<span class="pl-c"> **/</span>
+
+<span class="pl-k">auto</span> put1 = Http().put(<span class="pl-s"><span class="pl-pds">"</span>http://httpbin.org/put<span class="pl-pds">"</span></span>)
+            .content(<span class="pl-s"><span class="pl-pds">"</span>text/plain<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>Hello world<span class="pl-pds">"</span></span>)
+            .exec();
+
+<span class="pl-c">/*</span>
+<span class="pl-c"> * A simple delete request</span>
+<span class="pl-c"> **/</span>
+
+<span class="pl-k">auto</span> del = Http().del(<span class="pl-s"><span class="pl-pds">"</span>http://httpbin.org/delete<span class="pl-pds">"</span></span>)
+           .exec();
+
+</pre></div>
+
+<h2>
+<a id="prerequisites" class="anchor" href="#prerequisites" aria-hidden="true"><span class="octicon octicon-link"></span></a>Prerequisites</h2>
+
+<ul>
+<li>libcurl</li>
+<li>A compiler with C++11 support (GCC 4.8 and higher, Clang 3.4 and higher)</li>
+<li>cmake (At least version 2.8.11)</li>
+</ul>
+
+<p><strong>Note:</strong>A vagrant file has been provided that will provision a Ubuntu14.04
+box with all the pre-requisites. Just <code>vagrant up</code> then <code>vagrant ssh</code>.
+You will find the code in /vagrant directory inside the vagrant box.</p>
+
+<h2>
+<a id="external-libraries" class="anchor" href="#external-libraries" aria-hidden="true"><span class="octicon octicon-link"></span></a>External libraries</h2>
+
+<ul>
+<li><a href="https://github.com/philsquared/Catch">philsquared's catch unit testing</a></li>
+</ul>
+
+<h2>
+<a id="steps-to-build" class="anchor" href="#steps-to-build" aria-hidden="true"><span class="octicon octicon-link"></span></a>Steps to build</h2>
+
+<ul>
+<li>cd build</li>
+<li>cmake ..</li>
+<li>make</li>
+<li>make test (optional)</li>
+</ul>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/anuragsoni/restless">Restless</a> is maintained by <a href="https://github.com/anuragsoni">anuragsoni</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
+
