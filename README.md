@@ -65,7 +65,7 @@ auto del = Http().del("http://httpbin.org/delete")
 
 ## Prerequisites
 * libcurl
-* A compiler with C++11 support
+* A compiler with C++11 support (GCC 4.8 and higher, Clang 3.4 and higher)
 * cmake (At least version 2.8.11)
 
 **Note:**A vagrant file has been provided that will provision a Ubuntu14.04
