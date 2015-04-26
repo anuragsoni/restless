@@ -68,12 +68,14 @@ auto del = Http().del("http://httpbin.org/delete")
 * A compiler with C++11 support (GCC 4.8 and higher, Clang 3.4 and higher)
 * cmake (At least version 2.8.11)
 
-**Note:**A vagrant file has been provided that will provision a Ubuntu14.04
+**Note:** A vagrant file has been provided that will provision a Ubuntu14.04
 box with all the pre-requisites. Just ```vagrant up``` then ```vagrant ssh```.
 You will find the code in /vagrant directory inside the vagrant box.
 
 ## External libraries
+* libcurl
 * [philsquared's catch unit testing](https://github.com/philsquared/Catch)
+* [nlohmann's json](https://github.com/nlohmann/json) as a helper in testing
 
 ## Steps to build
 * cd build
