@@ -20,13 +20,13 @@ include_directories(${SRC_DIR})
 add_executable(${PROJECT_NAME_STR} main.cpp)
 target_include_directories(${PROJECT_NAME_STR} PRIVATE ${CURL_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME_STR}
-                        project_lib
+                        restless_lib
                         ${CURL_LIBRARIES})
 
 file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*.cpp)
 add_executable(test_restless ${TEST_SRC_FILES})
 target_link_libraries(test_restless
-        project_lib
+        restless_lib
         ${CURL_LIBRARIES}
         pthread
         )
