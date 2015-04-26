@@ -84,27 +84,21 @@ all the files in <code>src</code> directory and link to your project.</p>
 </pre></div>
 
 <h2>
-<a id="prerequisites" class="anchor" href="#prerequisites" aria-hidden="true"><span class="octicon octicon-link"></span></a>Prerequisites</h2>
+<a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dependencies</h2>
 
 <ul>
-<li>libcurl</li>
+<li><a href="http://curl.haxx.se/libcurl/">libcurl</a></li>
 <li>A compiler with C++11 support (GCC 4.8 and higher, Clang 3.4 and higher)</li>
 <li>cmake (At least version 2.8.11)</li>
+<li>
+<a href="https://github.com/philsquared/Catch">catch</a> - for development</li>
+<li>
+<a href="https://github.com/nlohmann/json">json</a> - as a helper in testing</li>
 </ul>
 
 <p><strong>Note:</strong> A vagrant file has been provided that will provision a Ubuntu14.04
 box with all the pre-requisites. Just <code>vagrant up</code> then <code>vagrant ssh</code>.
 You will find the code in /vagrant directory inside the vagrant box.</p>
-
-<h2>
-<a id="external-libraries" class="anchor" href="#external-libraries" aria-hidden="true"><span class="octicon octicon-link"></span></a>External libraries</h2>
-
-<ul>
-<li>libcurl</li>
-<li><a href="https://github.com/philsquared/Catch">philsquared's catch unit testing</a></li>
-<li>
-<a href="https://github.com/nlohmann/json">nlohmann's json</a> as a helper in testing</li>
-</ul>
 
 <h2>
 <a id="steps-to-build" class="anchor" href="#steps-to-build" aria-hidden="true"><span class="octicon octicon-link"></span></a>Steps to build</h2>
@@ -114,6 +108,16 @@ You will find the code in /vagrant directory inside the vagrant box.</p>
 <li>cmake ..</li>
 <li>make</li>
 <li>make test (optional)</li>
+</ul>
+
+<h2>
+<a id="contribute" class="anchor" href="#contribute" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contribute</h2>
+
+<ul>
+<li>Fork the project</li>
+<li>Make an addition or bugfix</li>
+<li>Add test cases</li>
+<li>Commit, then make a pull request (topic branches are recommended)</li>
 </ul>
 
       <footer class="site-footer">
