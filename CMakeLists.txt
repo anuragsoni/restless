@@ -12,8 +12,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 # set up include path
-include_directories(${CURL_INCLUDE_DIRS}
-    ${CPPDO_SOURCE_DIR}/include)
+include_directories(${CURL_INCLUDE_DIRS} include)
 
 # set up source directory
 add_subdirectory(src)
