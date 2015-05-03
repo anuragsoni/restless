@@ -1,34 +1,29 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8)
 
-set(PROJECT_NAME_STR restless)
+project(RESTLESS CXX)
 
-project(${PROJECT_NAME_STR} CXX)
-
+# check for dependencies
 find_package(CURL REQUIRED)
 
-# Enable C++11 features on gcc/clang
-if("${CMAKE_CXX_COMPILER_ID}" MATCHES "(GNU|Clang)")
-set(CMAKE_CXX_FLAGS "-std=c++11 -Wall")
+# compiler flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -g")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 endif()
 
-# Set source directory
-set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
-add_subdirectory(${SRC_DIR})
-include_directories(${SRC_DIR})
+# set up include path
+include_directories(${CURL_INCLUDE_DIRS}
+    ${CPPDO_SOURCE_DIR}/include)
 
+# set up source directory
+add_subdirectory(src)
 
-add_executable(${PROJECT_NAME_STR} main.cpp)
-target_include_directories(${PROJECT_NAME_STR} PRIVATE ${CURL_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME_STR}
-                        restless_lib
-                        ${CURL_LIBRARIES})
-
-file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*.cpp)
-add_executable(test_restless ${TEST_SRC_FILES})
-target_link_libraries(test_restless
-        restless_lib
-        ${CURL_LIBRARIES}
-        pthread
-        )
+# set up tests
 enable_testing()
-add_test(NAME test_restless COMMAND test_restless)
+add_executable(restless_unit test/unit.cpp)
+target_link_libraries(restless_unit
+    restless
+    ${CURL_LIBRARIES}
+    pthread
+)
+add_test(unitTest restless_unit)
