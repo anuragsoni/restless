@@ -1,4 +1,3 @@
-[![Build Status](https://drone.io/github.com/anuragsoni/restless/status.png)](https://drone.io/github.com/anuragsoni/restless/latest)
 # Restless
 Restless is a simple REST client for C++, powered by curl.
 
