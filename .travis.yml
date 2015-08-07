@@ -13,11 +13,12 @@ sudo: required
 matrix:
   include:
     - compiler: gcc
-      env: USE_SYSTEM_CMAKE=OFF
+      env: USE_SYSTEM_CMAKE=OFF GENERATE_COVERAGE=ON COVERALLS_UPLOAD=ON
 
 
 before_install:
     - sudo apt-get update
+    - if [ "$GENERATE_COVERAGE" == "ON" ]; then sudo pip install cpp-coveralls; fi
 
 install:
     - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
@@ -30,8 +31,11 @@ install:
 before_script:
     - cmake --version
     - cd build
-    - cmake ..
+    - cmake .. -DCMAKE_BUILD_TYPE=Debug
 
 script:
     - make VERBOSE=1
     - make test
+
+after_success:
+    - if [ "$GENERATE_COVERAGE" == "ON" ]; then coveralls --gcov /usr/bin/gcov-4.8 -i 'src' -i 'include' -r ../ --verbose; fi

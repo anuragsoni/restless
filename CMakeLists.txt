@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 project(RESTLESS CXX)
 
+# Add project cmake modules to path.
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+
 if(NOT ${CMAKE_VERSION} LESS 3.2)
         set(CMAKE_CXX_STANDARD 11)
         set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -49,6 +52,19 @@ message(STATUS "Restless CMake Options")
 message(STATUS "=======================================================")
 
 restless_option(BUILD_RESTLESS_TESTS "Set to ON to build restless tests." OFF)
+restless_option(GENERATE_COVERAGE "Set to ON to generate coverage reports." OFF)
+restless_option(COVERALLS_UPLOAD "Upload the generated coveralls json" OFF)
+if(GENERATE_COVERAGE)
+    set(COVERALLS_SRC_FILES ${PROJECT_SOURCE_DIR}/src/restless.cpp
+                            ${PROJECT_SOURCE_DIR}/include/helpers.hpp
+    )
+    include(Coveralls)
+    coveralls_turn_on_coverage()
+    coveralls_setup(
+        "${COVERALLS_SRC_FILES}"
+        ${COVERALLS_UPLOAD}
+    )
+endif()
 
 # set up tests
 
