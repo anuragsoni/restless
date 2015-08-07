@@ -70,11 +70,5 @@ endif()
 
 if(BUILD_RESTLESS_TESTS)
     enable_testing()
-    add_executable(restless_unit test/unit.cpp)
-    target_link_libraries(restless_unit
-        restless
-        ${CURL_LIBRARIES}
-        pthread
-    )
-    add_test(unitTest restless_unit)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 endif()
