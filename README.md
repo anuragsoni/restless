@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/anuragsoni/restless.svg?branch=master)](https://travis-ci.org/anuragsoni/restless)
+
 # Restless
 Restless is a simple REST client for C++, powered by curl.
 
