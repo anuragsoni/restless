@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 
 project(RESTLESS CXX)
 
-# Add project cmake modules to path.
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
-
 if(NOT ${CMAKE_VERSION} LESS 3.2)
         set(CMAKE_CXX_STANDARD 11)
         set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -25,15 +22,9 @@ else()
 endif()
 
 
-# check for dependencies
-find_package(CURL REQUIRED)
-
 # set up include path
-include_directories(${CURL_INCLUDE_DIRS} include)
-
-# set up source directory
-add_subdirectory(src)
-
+set(RESTLESS_LIBRARIES restless CACHE INTERNAL "")
+set(RESTLESS_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "")
 
 macro(restless_option OPTION_NAME OPTION_TEXT OPTION_DEFAULT)
     option(${OPTION_NAME} ${OPTION_TEXT} ${OPTION_DEFAULT})
@@ -47,28 +38,27 @@ macro(restless_option OPTION_NAME OPTION_TEXT OPTION_DEFAULT)
     message(STATUS "  ${OPTION_NAME}: ${${OPTION_NAME}}")
 endmacro()
 
-
 message(STATUS "Restless CMake Options")
 message(STATUS "=======================================================")
 
 restless_option(BUILD_RESTLESS_TESTS "Set to ON to build restless tests." OFF)
 restless_option(GENERATE_COVERAGE "Set to ON to generate coverage reports." OFF)
-restless_option(COVERALLS_UPLOAD "Upload the generated coveralls json" OFF)
-if(GENERATE_COVERAGE)
-    set(COVERALLS_SRC_FILES ${PROJECT_SOURCE_DIR}/src/restless.cpp
-                            ${PROJECT_SOURCE_DIR}/include/helpers.hpp
-    )
-    include(Coveralls)
-    coveralls_turn_on_coverage()
-    coveralls_setup(
-        "${COVERALLS_SRC_FILES}"
-        ${COVERALLS_UPLOAD}
-    )
-endif()
+restless_option(USE_SYSTEM_GTEST "Set to ON to generate coverage reports." OFF)
+restless_option(INSECURE_CURL "Set to ON to disable verification of SSL certificates." OFF)
+restless_option(USE_SYSTEM_CURL
+            "If ON, this project will look in the system paths for an installed curl library" OFF)
 
 # set up tests
 
 if(BUILD_RESTLESS_TESTS)
     enable_testing()
+endif()
+# 3rd party
+add_subdirectory(${PROJECT_SOURCE_DIR}/ext)
+
+# set up source directory
+add_subdirectory(src)
+
+if(BUILD_RESTLESS_TESTS)
     add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 endif()
