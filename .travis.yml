@@ -13,7 +13,7 @@ sudo: required
 matrix:
   include:
     - compiler: gcc
-      env: USE_SYSTEM_CMAKE=OFF GENERATE_COVERAGE=ON COVERALLS_UPLOAD=ON USE_SYSTEM_CURL=ON
+      env: USE_SYSTEM_CMAKE=OFF GENERATE_COVERAGE=ON COVERALLS_UPLOAD=ON
 
 
 before_install:

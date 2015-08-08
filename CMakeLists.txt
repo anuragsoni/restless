@@ -45,8 +45,7 @@ restless_option(BUILD_RESTLESS_TESTS "Set to ON to build restless tests." OFF)
 restless_option(GENERATE_COVERAGE "Set to ON to generate coverage reports." OFF)
 restless_option(USE_SYSTEM_GTEST "Set to ON to generate coverage reports." OFF)
 restless_option(INSECURE_CURL "Set to ON to disable verification of SSL certificates." OFF)
-restless_option(USE_SYSTEM_CURL
-            "If ON, this project will look in the system paths for an installed curl library" OFF)
+restless_option(USE_LOCAL_CURL "If ON, this project will look in the system paths for an installed curl library" OFF)
 
 # set up tests
 

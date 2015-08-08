@@ -36,10 +36,10 @@ endif()
 
 # Curl configuration
 
-if(USE_SYSTEM_CURL)
+if(NOT USE_LOCAL_CURL)
     find_package(CURL)
 endif()
-if(NOT USE_SYSTEM_CURL OR NOT CURL_FOUND)
+if(USE_LOCAL_CURL OR NOT CURL_FOUND)
     message(STATUS "Not using system Curl, using built-in curl project instead.")
     add_subdirectory(curl)
     set(CURL_FOUND TRUE)
