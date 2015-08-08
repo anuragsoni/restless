@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/anuragsoni/restless.svg?branch=master)](https://travis-ci.org/anuragsoni/restless)
-[![Coverage Status](https://coveralls.io/repos/anuragsoni/restless/badge.svg?branch=dev&service=github)](https://coveralls.io/github/anuragsoni/restless?branch=dev)
+[![Coverage Status](https://coveralls.io/repos/anuragsoni/restless/badge.svg?branch=master&service=github)](https://coveralls.io/github/anuragsoni/restless?branch=master)
 # Restless
 Restless is a simple REST client for C++, powered by curl.
 
