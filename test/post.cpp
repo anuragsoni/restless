@@ -1,51 +1,54 @@
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do
-                           // this in one cpp file
-#include <catch.hpp>
+#include <gtest/gtest.h>
 #include <json.hpp>
 #include <restless.hpp>
 using json = nlohmann::json;
 
-TEST_CASE("Post Request without content", "[post]") {
-        auto result = asoni::Handle().post("http://httpbin.org/post").exec();
-        REQUIRE(result.code == -1);
-        REQUIRE(result.body ==
-                "Empty post content not allowed. Did you meant to use GET?");
+TEST(PostRequestTest, PostWithoutContent) {
+  auto result = asoni::Handle().post("http://httpbin.org/post").exec();
+  EXPECT_EQ(result.code, -1);
+  EXPECT_EQ(result.body,
+            "Empty post content not allowed. Did you meant to use GET?");
 }
 
-TEST_CASE("Simple Post Request", "[post]") {
-        std::string post_content = "Hello world";
-        auto result = asoni::Handle()
-                          .post("http://httpbin.org/post")
-                          .content("text/plain", post_content)
-                          .exec();
-        auto response = json::parse(result.body);
-        REQUIRE(result.code == 200);
-        REQUIRE(response["data"] == post_content);
+TEST(PostRequestTest, SimplePostRequest) {
+  std::string post_content = "Hello world";
+  auto result = asoni::Handle()
+                    .post("http://httpbin.org/post")
+                    .content("text/plain", post_content)
+                    .exec();
+  auto response = json::parse(result.body);
+  EXPECT_EQ(result.code, 200);
+  EXPECT_EQ(response["data"], post_content);
 }
 
-TEST_CASE("Simple Post Request : HTTPS", "[post]") {
-        std::string post_content = "Hello world";
-        auto result = asoni::Handle()
-                          .post("https://httpbin.org/post")
-                          .content("text/plain", post_content)
-                          .exec();
-        auto response = json::parse(result.body);
-        REQUIRE(result.code == 200);
-        REQUIRE(response["data"] == post_content);
+TEST(PostRequestTest, PostRequestHTTPS) {
+  std::string post_content = "Hello world";
+  auto result = asoni::Handle()
+                    .post("https://httpbin.org/post")
+                    .content("text/plain", post_content)
+                    .exec();
+  auto response = json::parse(result.body);
+  EXPECT_EQ(result.code, 200);
+  EXPECT_EQ(response["data"], post_content);
 }
 
-TEST_CASE("Simple Post Request with custom header", "[post]") {
-        std::string post_content = "Hello world";
-        auto result = asoni::Handle()
-                          .post("http://httpbin.org/post")
-                          .content("text/plain", post_content)
-                          .header({{"Hello", "This is a header"},
-                                   {"Second", "Another header"}})
-                          .exec();
-        auto response = json::parse(result.body);
-        std::string header_hello = response["headers"]["Hello"];
-        std::string header_second = response["headers"]["Second"];
-        REQUIRE(result.code == 200);
-        REQUIRE(header_hello == "This is a header");
-        REQUIRE(header_second == "Another header");
+TEST(PostRequestTest, PostRequestCustomHeader) {
+  std::string post_content = "Hello world";
+  auto result =
+      asoni::Handle()
+          .post("http://httpbin.org/post")
+          .content("text/plain", post_content)
+          .header({{"Hello", "This is a header"}, {"Second", "Another header"}})
+          .exec();
+  auto response = json::parse(result.body);
+  std::string header_hello = response["headers"]["Hello"];
+  std::string header_second = response["headers"]["Second"];
+  EXPECT_EQ(result.code, 200);
+  EXPECT_EQ(header_hello, "This is a header");
+  EXPECT_EQ(header_second, "Another header");
+}
+
+int main(int argc, char** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

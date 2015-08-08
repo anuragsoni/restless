@@ -1,11 +1,13 @@
-
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do
-                           // this in one cpp file
-#include <catch.hpp>
+#include <gtest/gtest.h>
 #include <json.hpp>
 #include <restless.hpp>
 using json = nlohmann::json;
-TEST_CASE("Simple Delete Request : HTTPS", "[delete]") {
+TEST(DeleteRequestTest, simpleDelete) {
         auto result = asoni::Handle().del("https://httpbin.org/delete").exec();
-        REQUIRE(result.code == 200);
+        EXPECT_EQ(result.code, 200);
+}
+
+int main(int argc, char** argv) {
+        ::testing::InitGoogleTest(&argc, argv);
+        return RUN_ALL_TESTS();
 }
