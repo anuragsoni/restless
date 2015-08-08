@@ -1,6 +1,9 @@
 [submodule "ext/json"]
 	path = ext/json
 	url = https://github.com/nlohmann/json.git
-[submodule "ext/catch"]
-	path = ext/catch
-	url = https://github.com/philsquared/Catch.git
+[submodule "ext/gtest"]
+	path = ext/gtest
+	url = https://chromium.googlesource.com/chromium/testing/gtest
+[submodule "ext/curl"]
+	path = ext/curl
+	url = git@github.com:anuragsoni/curl.git
