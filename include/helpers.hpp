@@ -5,6 +5,8 @@
  */
 #pragma once
 #include <algorithm>
+#include <functional>
+#include <cctype>
 #define AGENT_NAME "restless/0.2"
 namespace
 {
