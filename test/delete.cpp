@@ -7,6 +7,12 @@ TEST(DeleteRequestTest, simpleDelete) {
         EXPECT_EQ(result.code, 200);
 }
 
+TEST(DeleteRequestTest, simpleDeleteBasicAuth) {
+        auto result = asoni::Handle()
+                          .del("https://httpbin.org/delete", "password")
+                          .exec();
+        EXPECT_EQ(result.code, 200);
+}
 int main(int argc, char** argv) {
         ::testing::InitGoogleTest(&argc, argv);
         return RUN_ALL_TESTS();
