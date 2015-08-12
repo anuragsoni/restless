@@ -73,8 +73,8 @@ auto del = Http().del("http://httpbin.org/delete")
 * [libcurl](http://curl.haxx.se/libcurl/)
 * A compiler with C++11 support (GCC 4.8 and higher, Clang 3.4 and higher)
 * cmake (At least version 2.8.11)
-* [catch](https://github.com/philsquared/Catch) - for development
-* [json](https://github.com/nlohmann/json) - as a helper in testing
+* [gtest](https://code.google.com/p/googletest/) - for development and included as a submodule
+* [json](https://github.com/nlohmann/json) - as a helper in testing and included as a submodule
 
 
 **Note:** A vagrant file has been provided that will provision a Ubuntu14.04
