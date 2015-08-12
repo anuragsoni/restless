@@ -7,7 +7,7 @@ TEST(PostRequestTest, PostWithoutContent) {
         auto result = asoni::Handle().post("http://httpbin.org/post").exec();
         EXPECT_EQ(result.code, -1);
         EXPECT_EQ(result.body,
-                  "Empty post content not allowed. Did you meant to use GET?");
+                  "Empty post content not allowed. Did you mean to use GET?");
 }
 
 TEST(PostRequestTest, SimplePostRequest) {
