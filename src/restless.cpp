@@ -263,12 +263,34 @@ Handle::response Handle::execDel() {
         // Write callback function
         curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
         curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &res);
+
+        // Set post fields and post field size
+        if (!post_content.empty()) {
+                curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDS,
+                                 post_content.c_str());
+                curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDSIZE,
+                                 post_content.size());
+        }
+        // Write callback function
+        curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
+        curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &res);
+
         struct curl_slist *chunk = nullptr;
+        if (!post_content_type.empty()) {
+                std::string content_type = "Content-Type: " + post_content_type;
+                chunk = curl_slist_append(chunk, content_type.c_str());
+        } else if (!post_content.empty()) {
+                res.body = "Content-type needs to be provided.";
+                res.code = -1;
+                return res;
+        }
         if (!custom_headers.empty()) {
                 for (auto x : custom_headers) {
                         std::string temp_header = x.first + ": " + x.second;
                         chunk = curl_slist_append(chunk, temp_header.c_str());
                 }
+        }
+        if (chunk) {
                 curl_easy_setopt(curl.get(), CURLOPT_HTTPHEADER, chunk);
         }
 
