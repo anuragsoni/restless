@@ -125,6 +125,7 @@ Handle::response Handle::execGet() {
         if (req != CURLE_OK) {
                 res.body = "Failed to fetch response.";
                 res.code = -1;
+                curl_slist_free_all(chunk);
                 return res;
         }
         long http_code{0};
@@ -184,6 +185,7 @@ Handle::response Handle::execPost() {
         if (req != CURLE_OK) {
                 res.body = "Failed to post content.";
                 res.code = -1;
+                curl_slist_free_all(chunk);
                 return res;
         }
         long http_code{0};
@@ -246,6 +248,7 @@ Handle::response Handle::execPut() {
         if (req != CURLE_OK) {
                 res.body = "Put request failed.";
                 res.code = -1;
+                curl_slist_free_all(chunk);
                 return res;
         }
         long http_code{0};
@@ -280,6 +283,7 @@ Handle::response Handle::execDel() {
         if (req != CURLE_OK) {
                 res.body = "Delete request failed.";
                 res.code = -1;
+                curl_slist_free_all(chunk);
                 return res;
         }
         long http_code{0};
