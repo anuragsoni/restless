@@ -36,3 +36,9 @@
 .zsh_history
 .zshrc
 .zsh-update
+
+# User-specific stuff:
+.idea/*
+
+# CMake
+cmake-build-debug
