@@ -27,7 +27,10 @@ private:
     // Request URI
     std::string URI;
 
-    //Password for Basic Auth
+    // Maximum time the request is allowed to take
+    long timeout_value = 0L;
+
+    // Password for Basic Auth
     std::string basic_auth_pass;
 
     // Post content type
@@ -111,6 +114,8 @@ public:
     Handle &header(std::map<std::string, std::string> iHeaders);
 
     Handle &content(const std::string content_type, const std::string content_data);
+
+    Handle &timeout(long timeout);
 
     response exec();
 };

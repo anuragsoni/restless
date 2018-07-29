@@ -61,6 +61,11 @@ Handle &Handle::content(const std::string content_type,
         return *this;
 }
 
+Handle& Handle::timeout(long timeout) {
+        this->timeout_value = timeout;
+        return *this;
+}
+
 Handle::response Handle::exec() {
         response result;
 
@@ -78,6 +83,10 @@ Handle::response Handle::exec() {
                                  Handle::user_agent.c_str());
                 // Requested URL
                 curl_easy_setopt(curl.get(), CURLOPT_URL, URI.c_str());
+
+                // Timeout
+                curl_easy_setopt(curl.get(), CURLOPT_TIMEOUT, timeout_value);
+
                 switch (method) {
                         case Request_Type::GET:
                                 result = execGet();
