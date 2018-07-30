@@ -5,5 +5,5 @@
 	path = ext/gtest
 	url = https://chromium.googlesource.com/chromium/testing/gtest
 [submodule "ext/curl"]
-	path = ext/curl
-	url = https://github.com/anuragsoni/curl.git
+    path = ext/curl
+	url=https://github.com/curl/curl.git
