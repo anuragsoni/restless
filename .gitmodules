@@ -6,4 +6,4 @@
 	url = https://chromium.googlesource.com/chromium/testing/gtest
 [submodule "ext/curl"]
     path = ext/curl
-	url=https://github.com/curl/curl.git
+	url = https://github.com/curl/curl.git
