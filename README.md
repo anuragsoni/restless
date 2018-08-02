@@ -73,7 +73,7 @@ auto del = Http().del("http://httpbin.org/delete")
 * [libcurl](http://curl.haxx.se/libcurl/)
 * A compiler with C++11 support (GCC 4.8 and higher, Clang 3.4 and higher)
 * cmake (At least version 2.8.11)
-* [catch](https://github.com/philsquared/Catch) - for development
+* [gtest](https://chromium.googlesource.com/chromium/testing/gtest) - for building and running the tests
 * [json](https://github.com/nlohmann/json) - as a helper in testing
 
 
