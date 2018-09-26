@@ -75,6 +75,8 @@ if(BUILD_RESTLESS_TESTS)
     set_cache_variable(GTEST_MAIN_LIBRARIES "Location of libgtest-main")
     set_cache_variable(GTEST_BOTH_LIBRARIES "Location of both gtest libraries")
     set_cache_variable(GTEST_INCLUDE_DIRS "Location of gtest include files")
+
+    target_compile_options(gtest PUBLIC -DGTEST_USE_OWN_TR1_TUPLE)
 endif()
 
 # json

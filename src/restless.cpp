@@ -56,8 +56,20 @@ Handle &Handle::del(const std::string iUri, const std::string password) {
 
 Handle &Handle::content(const std::string content_type,
                         const std::string content_data) {
+        std::copy(content_data.begin(), content_data.end(), std::back_inserter(post_content));
+        this->post_content_type = content_type;
+        return *this;
+}
+
+Handle &Handle::content(const std::string content_type,
+                        const std::vector<uint8_t > content_data) {
         this->post_content = content_data;
         this->post_content_type = content_type;
+        return *this;
+}
+
+Handle& Handle::timeout(long timeout) {
+        this->timeout_value = timeout;
         return *this;
 }
 
@@ -78,6 +90,10 @@ Handle::response Handle::exec() {
                                  Handle::user_agent.c_str());
                 // Requested URL
                 curl_easy_setopt(curl.get(), CURLOPT_URL, URI.c_str());
+
+                // Timeout
+                curl_easy_setopt(curl.get(), CURLOPT_TIMEOUT, timeout_value);
+
                 switch (method) {
                         case Request_Type::GET:
                                 result = execGet();
@@ -146,7 +162,7 @@ Handle::response Handle::execPost() {
         // Set post fields and post field size
         if (!post_content.empty()) {
                 curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDS,
-                                 post_content.c_str());
+                                 post_content.data());
                 curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDSIZE,
                                  post_content.size());
         } else {
@@ -200,7 +216,7 @@ Handle::response Handle::execPut() {
         response res;
         upload_object up_obj;
         if (!post_content.empty()) {
-                up_obj.data = post_content.c_str();
+                up_obj.data = reinterpret_cast<char*> (post_content.data());
                 up_obj.length = post_content.size();
         } else {
                 res.code = -1;
@@ -266,12 +282,34 @@ Handle::response Handle::execDel() {
         // Write callback function
         curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
         curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &res);
+
+        // Set post fields and post field size
+        if (!post_content.empty()) {
+                curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDS,
+                                 post_content.data());
+                curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDSIZE,
+                                 post_content.size());
+        }
+        // Write callback function
+        curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
+        curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &res);
+
         struct curl_slist *chunk = nullptr;
+        if (!post_content_type.empty()) {
+                std::string content_type = "Content-Type: " + post_content_type;
+                chunk = curl_slist_append(chunk, content_type.c_str());
+        } else if (!post_content.empty()) {
+                res.body = "Content-type needs to be provided.";
+                res.code = -1;
+                return res;
+        }
         if (!custom_headers.empty()) {
                 for (auto x : custom_headers) {
                         std::string temp_header = x.first + ": " + x.second;
                         chunk = curl_slist_append(chunk, temp_header.c_str());
                 }
+        }
+        if (chunk) {
                 curl_easy_setopt(curl.get(), CURLOPT_HTTPHEADER, chunk);
         }
 

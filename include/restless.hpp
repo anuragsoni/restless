@@ -8,6 +8,7 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include <vector>
 #include <memory>
 #include "helpers.hpp"
 
@@ -27,14 +28,17 @@ private:
     // Request URI
     std::string URI;
 
-    //Password for Basic Auth
+    // Maximum time the request is allowed to take
+    long timeout_value = 0L;
+
+    // Password for Basic Auth
     std::string basic_auth_pass;
 
     // Post content type
     std::string post_content_type;
 
     // Post content
-    std::string post_content;
+    std::vector<uint8_t > post_content;
 
     // Custom headers
     std::map<std::string, std::string> custom_headers;
@@ -46,6 +50,9 @@ private:
         std::string body;
         std::map<std::string, std::string> headers;
         ~response() { }
+        std::vector<uint8_t > bodyRaw() {
+            return std::vector<uint8_t> (body.begin(), body.end());
+        }
     };
 
     // struct for uploading data
@@ -111,6 +118,10 @@ public:
     Handle &header(std::map<std::string, std::string> iHeaders);
 
     Handle &content(const std::string content_type, const std::string content_data);
+
+    Handle &content(const std::string content_type, const std::vector<uint8_t > content_data);
+
+    Handle &timeout(long timeout);
 
     response exec();
 };
