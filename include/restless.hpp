@@ -50,6 +50,9 @@ private:
         std::string body;
         std::map<std::string, std::string> headers;
         ~response() { }
+        std::vector<uint8_t > bodyRaw() {
+            return std::vector<uint8_t> (body.begin(), body.end());
+        }
     };
 
     // struct for uploading data
