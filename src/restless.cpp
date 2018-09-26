@@ -56,6 +56,13 @@ Handle &Handle::del(const std::string iUri, const std::string password) {
 
 Handle &Handle::content(const std::string content_type,
                         const std::string content_data) {
+        std::copy(content_data.begin(), content_data.end(), std::back_inserter(post_content));
+        this->post_content_type = content_type;
+        return *this;
+}
+
+Handle &Handle::content(const std::string content_type,
+                        const std::vector<uint8_t > content_data) {
         this->post_content = content_data;
         this->post_content_type = content_type;
         return *this;
@@ -154,7 +161,7 @@ Handle::response Handle::execPost() {
         // Set post fields and post field size
         if (!post_content.empty()) {
                 curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDS,
-                                 post_content.c_str());
+                                 post_content.data());
                 curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDSIZE,
                                  post_content.size());
         } else {
@@ -207,7 +214,7 @@ Handle::response Handle::execPut() {
         response res;
         upload_object up_obj;
         if (!post_content.empty()) {
-                up_obj.data = post_content.c_str();
+                up_obj.data = reinterpret_cast<char*> (post_content.data());
                 up_obj.length = post_content.size();
         } else {
                 res.code = -1;
@@ -276,7 +283,7 @@ Handle::response Handle::execDel() {
         // Set post fields and post field size
         if (!post_content.empty()) {
                 curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDS,
-                                 post_content.c_str());
+                                 post_content.data());
                 curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDSIZE,
                                  post_content.size());
         }

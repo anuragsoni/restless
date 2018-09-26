@@ -8,6 +8,7 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include <vector>
 #include <memory>
 #include "helpers.hpp"
 
@@ -37,7 +38,7 @@ private:
     std::string post_content_type;
 
     // Post content
-    std::string post_content;
+    std::vector<uint8_t > post_content;
 
     // Custom headers
     std::map<std::string, std::string> custom_headers;
@@ -114,6 +115,8 @@ public:
     Handle &header(std::map<std::string, std::string> iHeaders);
 
     Handle &content(const std::string content_type, const std::string content_data);
+
+    Handle &content(const std::string content_type, const std::vector<uint8_t > content_data);
 
     Handle &timeout(long timeout);
 
